@@ -6,9 +6,10 @@ from keras import regularizers
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.layers import Dense, Input
 from keras.models import Model
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+#from keras.backend import argmax
 
 LABELS = ["Normal","Fraud"]
 RANDOM_SEED = 1398
@@ -60,8 +61,26 @@ history = AutoEncoderModel.fit(train_x, train_x, epochs=nb_epoch, batch_size=bat
 threshold_fixed = 5
 
 test_x_predictions = AutoEncoderModel.predict(test_x)
+
 mse = np.mean(np.power(test_x - test_x_predictions, 2), axis=1)
 error_df = pd.DataFrame({'Reconstruction_error': mse, 'True_class': test_y})
+
+'''
+#presicion, recall, f1-score 계산
+precision = precision_score(test_y, label_predictions)
+print('Precision: %f' % precision)
+
+recall = recall_score(test_y, label_predictions)
+print('Recall: %f' % recall)
+
+f1 = f1_score(test_y, label_predictions)
+print('F1 score: %f' % f1)
+'''
+#report 출력을 위한 reduce
+label_predictions=np.argmax(np.round(test_x_predictions), axis=1)
+
+report=classification_report(test_y, label_predictions)
+print(report)
 
 pred_y = [1 if e > threshold_fixed else 0 for e in error_df.Reconstruction_error.values]
 conf_matrix = confusion_matrix(error_df.True_class, pred_y)
