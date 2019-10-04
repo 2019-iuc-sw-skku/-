@@ -22,7 +22,6 @@ warnings.filterwarnings("ignore")
 HOST = 'localhost'
 PORT = 1234
 
-
 class MyTcpHandler(socketserver.StreamRequestHandler):
     '''
     Server handler for handle requests
@@ -30,7 +29,8 @@ class MyTcpHandler(socketserver.StreamRequestHandler):
     def handle(self):
         global DEFAULT_GRAPH
         now = time.localtime()
-        print('%04d-%02d-%02d %02d:%02d:%02d' % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec), end='')
+        connected_time = '%04d-%02d-%02d %02d:%02d:%02d' % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+        print(connected_time, end='')
         print('[%s] is connected' %self.client_address[0])
         data = self.request.recv(1024)
         nparr = pd.read_json(data.decode()).as_matrix()
@@ -59,6 +59,12 @@ class MyTcpHandler(socketserver.StreamRequestHandler):
             if score >= self.server.pass_score:
                 self.request.send(bytes(str('0,%d' % score), 'utf8'))
             else:
+                '''
+                여기에 팝업창띄우는 코드 삽입예정
+                '''
+                logfile = open('./fraudlog.txt', 'a')
+                logfile.write(connected_time + ' ' + self.client_address[0] + '\n')
+                logfile.close()
                 self.request.send(bytes(str('1,%d' % score), 'utf8'))
 
 
